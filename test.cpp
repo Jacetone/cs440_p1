@@ -31,6 +31,8 @@
     }                                                                          \
 } while (0)
 
+
+
 size_t alloc_call_count;
 size_t total_bytes_allocated;
 
@@ -82,10 +84,7 @@ calloc(size_t num, size_t size) {
  * Test for class MyClass.
  */
 
-struct MyClass {
-    int id;
-    char name[10];
-};
+
 
 bool
 MyClass_less_by_id(const MyClass &o1, const MyClass &o2) {
@@ -116,7 +115,7 @@ int_less(const int &o1, const int &o2) {
 
 //Deque_DEFINE(int)
 
-int
+int 
 main() {
 /*
     FILE *devnull = fopen("/dev/null", "w");
