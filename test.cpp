@@ -32,7 +32,6 @@
 } while (0)
 
 
-
 size_t alloc_call_count;
 size_t total_bytes_allocated;
 
