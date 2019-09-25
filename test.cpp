@@ -31,7 +31,6 @@
     }                                                                          \
 } while (0)
 
-
 size_t alloc_call_count;
 size_t total_bytes_allocated;
 
@@ -117,9 +116,8 @@ int_less(const int &o1, const int &o2) {
 
 Deque_DEFINE(int)
 
-int 
+int
 main() {
-
     FILE *devnull = fopen("/dev/null", "w");
     assert(devnull != 0);
     {
@@ -134,7 +132,7 @@ main() {
         // Should print "---- Deque_MyClass, 14".
         printf("---- %s, %d\n", deq.type_name, (int) sizeof(deq.type_name));
         // std::cout << "---- " << deq.type_name << ", " << sizeof(deq.type_name) << std::endl;
-        //assert(sizeof deq.type_name == 14);
+        assert(sizeof deq.type_name == 14);
 
         deq.push_back(&deq, MyClass{1, "Joe"});
         deq.push_back(&deq, MyClass{2, "Mary"});
@@ -295,7 +293,6 @@ main() {
 
         deq.dtor(&deq);
     }
-#if 0
 
     // Test equality.  It is undefined behavior if the two deques were constructed with different
     // comparison functions.
@@ -530,6 +527,4 @@ main() {
    printf("%ld allocations totalling %ld bytes\n", alloc_call_count, total_bytes_allocated);
    int rv = fclose(devnull);
    assert(rv == 0);
-#endif
-	return 0;
 }
