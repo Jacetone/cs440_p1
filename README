@@ -1,8 +1,5 @@
-Name:
-B-Number:
-Class: # cs440 or cs540
+Name: Zachary Field
+B-Number: 00651229
+Class: # cs440
 
-Optional:
-	1. my own test file can do ...
-	2. ...
-	
+Note: Everything runs as intended however i have 1000122 memory allocations because I call malloc in sort. Please be merciful.
