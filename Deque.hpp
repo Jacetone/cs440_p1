@@ -3,46 +3,87 @@ struct MyClass {
     char name[10];
 };
 
+struct Deque_MyClass_Iterator
+{
+	size_t pos;
+	size_t deq_capacity;
+	MyClass* deq_ptr;	
+
+	void (*inc)(Deque_MyClass_Iterator *it);
+	void (*dec)(Deque_MyClass_Iterator *it);
+	MyClass& (*deref)(Deque_MyClass_Iterator *it);
+};
 struct Deque_MyClass
 {
 	size_t front_idx;
 	size_t left;
 	size_t right;
 	size_t capacity;
-	size_t deq_size;
-	MyClass* arr; 
+	MyClass* arr;
 	char* type_name;
 
-	void (*resize)(Deque_MyClass *deq);
+
+	Deque_MyClass_Iterator (*begin)(Deque_MyClass *deq);
+	Deque_MyClass_Iterator (*end)(Deque_MyClass *deq);
+
+	bool(*compare)(const MyClass &T, const MyClass &U);
 	bool (*isFull)(Deque_MyClass *deq);
+	bool (*empty)(Deque_MyClass *deq);
+	void (*resize)(Deque_MyClass *deq);
 	void (*dtor)(Deque_MyClass *deq);
 	void (*clear)(Deque_MyClass *deq);
-	size_t (*size)(Deque_MyClass *deq);
-	bool (*empty)(Deque_MyClass *deq);
 	void (*push_back)(Deque_MyClass *deq, MyClass val);
 	void (*push_front)(Deque_MyClass *deq, MyClass val);
-	MyClass& (*front)(Deque_MyClass *deq);
-	MyClass& (*back)(Deque_MyClass *deq);	
-	MyClass& (*at)(Deque_MyClass *deq, int index);
 	void (*pop_back)(Deque_MyClass *deq);
 	void (*pop_front)(Deque_MyClass *deq);
-/*Still need to add sort, and begin and end iterator functions(new struct)*/
+	size_t (*size)(Deque_MyClass *deq);
+	MyClass& (*front)(Deque_MyClass *deq);
+	MyClass& (*back)(Deque_MyClass *deq);	
+	MyClass& (*at)(Deque_MyClass *deq, size_t index);
 
-/* Functions:
-* * Size
-* * Empty
-* * push_back
-* * push_front
-* * front
-* * back
-* * at
-* * pop_back
-* * pop_front
-* * sort
-* * begin
-* * end
-*/
 };
+
+void Deque_MyClass_Iterator_inc(Deque_MyClass_Iterator *it){
+	it->pos++;
+}
+void Deque_MyClass_Iterator_dec(Deque_MyClass_Iterator *it){
+	it->pos--;
+}
+MyClass& Deque_MyClass_deref(Deque_MyClass_Iterator *it){
+	return it->deq_ptr[it->pos % it->deq_capacity];
+}
+Deque_MyClass_Iterator Deque_MyClass_begin(Deque_MyClass *deq){
+	Deque_MyClass_Iterator it = {deq->left, 
+				deq->capacity,
+				deq->arr, 
+				Deque_MyClass_Iterator_inc,
+				Deque_MyClass_Iterator_dec,
+				Deque_MyClass_deref};
+	return it;
+}
+Deque_MyClass_Iterator Deque_MyClass_end(Deque_MyClass *deq){
+	Deque_MyClass_Iterator it = {deq->right,
+				deq->capacity, 
+				deq->arr, 
+				Deque_MyClass_Iterator_inc,
+				Deque_MyClass_Iterator_dec,
+				Deque_MyClass_deref};
+	return it;
+}
+
+bool Deque_MyClass_equal(Deque_MyClass &deq1, Deque_MyClass &deq2){
+	size_t deq_size = deq1.size(&deq1);
+	if(deq_size == deq2.size(&deq2)){
+		for(size_t i = 0; i < deq_size; i++){
+			if((!deq1.compare(deq1.at(&deq1, i), deq2.at(&deq2, i)) && !deq1.compare(deq2.at(&deq2, i), deq1.at(&deq1, i))))continue;
+			else return false;
+		}
+		return true;
+	} else return false;
+}
+bool Deque_MyClass_Iterator_equal(const Deque_MyClass_Iterator &it1, const Deque_MyClass_Iterator &it2){
+	return (it1.deq_ptr == it2.deq_ptr && it1.pos == it2.pos);
+}
 
 void Deque_MyClass_resize(Deque_MyClass *deq){
 	size_t temp = 2*deq->capacity;
@@ -56,19 +97,17 @@ void Deque_MyClass_resize(Deque_MyClass *deq){
 	deq->capacity = temp;
 }
 bool Deque_MyClass_isFull(Deque_MyClass *deq){
-	if(deq->deq_size == deq->capacity) return true;
-	return false;
+	return (deq->size(deq) == deq->capacity);
 }
 size_t Deque_MyClass_size(Deque_MyClass *deq){
-	return deq->deq_size;
+	return deq->right - deq->left;
 }
 bool Deque_MyClass_empty(Deque_MyClass *deq){
-	if(deq->deq_size == 0) return true;
-	return false;
+    return !deq->size(deq);
 }
 
 void Deque_MyClass_push_back(Deque_MyClass *deq, MyClass val){
-	if(deq->deq_size == deq->capacity){
+	if(deq->isFull(deq)){
 		deq->resize(deq);
 		deq->arr[deq->right] = val;
 		deq->right = deq->right + 1;
@@ -77,7 +116,6 @@ void Deque_MyClass_push_back(Deque_MyClass *deq, MyClass val){
 		deq->arr[deq->right] = val;
 		deq->right = deq->right + 1;
 	}
-	deq->deq_size++;
 }
 
 void Deque_MyClass_push_front(Deque_MyClass *deq, MyClass val){
@@ -86,39 +124,34 @@ void Deque_MyClass_push_front(Deque_MyClass *deq, MyClass val){
 		deq->arr[deq->capacity - 1] = val;
 	}
 	else if(deq->left == 0){
-		deq->left = deq->capacity - 1;
+		deq->left += deq->capacity - 1;
+		deq->right += deq->capacity;
 		deq->arr[deq->left] = val;
 	}
 	else{
 		deq->left--;
 		deq->arr[deq->left] = val;
 	}
-	deq->deq_size++;
 }
 
 MyClass& Deque_MyClass_front(Deque_MyClass *deq){	
-	return deq->arr[deq->left];
+	return deq->arr[deq->left%deq->capacity];
 }
 
 MyClass& Deque_MyClass_back(Deque_MyClass *deq){
-	if(deq->right == 0){
-		return deq->arr[(deq->capacity)-1];
-	}
-	return deq->arr[(deq->right)-1];
+	return deq->arr[((deq->right)-1)%deq->capacity];
 }
 
-MyClass& Deque_MyClass_at(Deque_MyClass *deq, int index){
-	return deq->arr[index];
+MyClass& Deque_MyClass_at(Deque_MyClass *deq, size_t index){
+	return deq->arr[(deq->left + index)%deq->capacity];
 }
 
 void Deque_MyClass_pop_back(Deque_MyClass *deq){
 	deq->right--;
-	deq->deq_size--;
 }
 
 void Deque_MyClass_pop_front(Deque_MyClass *deq){
 	deq->left++;
-	deq->deq_size--;
 }
 void Deque_MyClass_clear(Deque_MyClass *deq){
 	deq->left = 0;
@@ -133,10 +166,12 @@ void Deque_MyClass_dtor(Deque_MyClass *deq){
 	deq->right = 0;
 	deq->capacity = 0;
 	deq->front_idx = 0;
-	deq->deq_size = 0;
 	deq->type_name = NULL;
 	free((size_t*)deq->arr);
-	
+
+	deq->compare = NULL;
+	deq->begin = NULL;
+	deq->end = NULL;
 	deq->resize = NULL;
 	deq->clear = NULL;
 	deq->size = NULL;
@@ -154,10 +189,13 @@ void Deque_MyClass_ctor (Deque_MyClass *deq, bool(*compare)(const MyClass &T, co
 	deq->left = 0;
 	deq->right = 0;
 	deq->capacity = 16;
-	deq->deq_size = 0;
 	deq->type_name = NULL;
 	deq->arr = (MyClass*)malloc(sizeof(MyClass)*deq->capacity);
 
+	deq->isFull = Deque_MyClass_isFull;
+	deq->compare = compare;
+	deq->begin = Deque_MyClass_begin;
+	deq->end = Deque_MyClass_end;
 	deq->resize = Deque_MyClass_resize;
 	deq->dtor = Deque_MyClass_dtor;
 	deq->clear = Deque_MyClass_clear;
