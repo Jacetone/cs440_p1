@@ -83,7 +83,10 @@ calloc(size_t num, size_t size) {
  * Test for class MyClass.
  */
 
-
+struct MyClass {
+    int id;
+    char name[10];
+};
 
 bool
 MyClass_less_by_id(const MyClass &o1, const MyClass &o2) {
@@ -101,7 +104,7 @@ MyClass_print(const MyClass *o) {
     printf("%s\n", o->name);
 }
 
-//Deque_DEFINE(MyClass)
+Deque_DEFINE(MyClass)
 
 /*
  * Test for int.
@@ -112,7 +115,7 @@ int_less(const int &o1, const int &o2) {
     return o1 < o2;
 }
 
-//Deque_DEFINE(int)
+Deque_DEFINE(int)
 
 int 
 main() {
@@ -240,7 +243,6 @@ main() {
     }
 
     // Test that it can handle other types.  Tests are the same, more or less.
-#if 0
     {
         Deque_int deq;
         Deque_int_ctor(&deq, int_less);
@@ -293,6 +295,7 @@ main() {
 
         deq.dtor(&deq);
     }
+#if 0
 
     // Test equality.  It is undefined behavior if the two deques were constructed with different
     // comparison functions.
