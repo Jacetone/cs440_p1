@@ -15,7 +15,7 @@ struct Deque_##t                                                                
 	size_t right;                                                                                                                       \
 	size_t capacity;                                                                                                                    \
 	t* arr;                                                                                                                       \
-	char* type_name;                                                                                                                    \
+	char type_name[6 + sizeof(#t)];                                                                                                                    \
 	Deque_##t##_Iterator (*begin)(Deque_##t *deq);                                                                                      \
 	Deque_##t##_Iterator (*end)(Deque_##t *deq);                                                                                        \
 	bool(*compare)(const t &T, const t &U);                                                                                 \
@@ -155,7 +155,7 @@ void Deque_##t##_dtor(Deque_##t *deq){                                          
 	deq->right = 0;                                                                                                                     \
 	deq->capacity = 0;                                                                                                                  \
 	deq->front_idx = 0;                                                                                                                 \
-	deq->type_name = NULL;                                                                                                              \
+	deq->type_name[0] = '\0';                                                                                                              \
 	free((size_t*)deq->arr);                                                                                                            \
 	                                                                                                                                    \
 	deq->compare = NULL;                                                                                                                \
@@ -178,7 +178,7 @@ void Deque_##t##_ctor (Deque_##t *deq, bool(*compare)(const t &T, const t &U)){ 
 	deq->left = 0;                                                                                                                      \
 	deq->right = 0;                                                                                                                     \
 	deq->capacity = 16;                                                                                                                 \
-	deq->type_name = NULL;                                                                                                              \
+	strcpy(deq->type_name, "Deque_"#t);                                                                                                     \
 	deq->arr = (t*)malloc(sizeof(t)*deq->capacity);                                                                         \
 	                                                                                                                                    \
 	deq->isFull = Deque_##t##_isFull;                                                                                                   \
